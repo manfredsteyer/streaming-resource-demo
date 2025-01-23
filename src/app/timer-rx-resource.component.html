@@ -1,0 +1,13 @@
+<h2>Streaming RxResource Demo</h2>
+
+<p>
+  <button (click)="forward()">Forward</button>
+</p>
+
+<p><b>Timer:</b> {{ timerResource.value() }}</p>
+
+@if (timerResource.error()) {
+<p><b>Error</b> due to {{ timerResource.error() }}</p>
+}
+
+<p><b>Status:</b> {{ ResourceStatus[timerResource.status()] }}</p>

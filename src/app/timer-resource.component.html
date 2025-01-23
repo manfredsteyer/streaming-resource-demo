@@ -1,0 +1,13 @@
+<h2>Streaming Resource Demo</h2>
+
+<p>
+  <button (click)="forward()">Forward</button>
+</p>
+
+<p><b>Timer:</b> {{ timer.value() }}</p>
+
+@if (timer.error()) {
+<p><b>Error</b> due to {{ timer.error() }}</p>
+}
+
+<p><b>Status:</b> {{ ResourceStatus[timer.status()] }}</p>
