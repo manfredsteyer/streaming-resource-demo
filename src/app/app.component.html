@@ -5,15 +5,15 @@
 </p>
 
 <p>
-    <b>Timer:</b> {{ timer.value() }}
+    <b>Timer:</b> {{ timerResource.value() }}
 </p>
 
-@if (timer.error()) {
+@if (timerResource.error()) {
 <p>
-    <b>Error</b> due to {{ timer.error() }}
+    <b>Error</b> due to {{ timerResource.error() }}
 </p>
 }
 
 <p>
-    <b>Status:</b> {{ ResourceStatus[timer.status()] }}
+    <b>Status:</b> {{ ResourceStatus[timerResource.status()] }}
 </p>

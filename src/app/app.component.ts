@@ -10,6 +10,9 @@ import {
   signal,
 } from '@angular/core';
 
+import { rxResource } from '@angular/core/rxjs-interop';
+import { interval, map, startWith, switchMap, tap, throwError, timer } from 'rxjs';
+
 export type StreamItem = {
   value: number;
 }
@@ -78,9 +81,54 @@ export function timerResource(
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  startValue = signal(0);
-  timer = timerResource(1000, this.startValue);
   ResourceStatus = ResourceStatus;
+
+  startValue = signal(0);
+
+  request = computed(() => ({
+    startValue: this.startValue()
+  }));
+
+  //
+  // All rxResources are now streaming resources.
+  // If we want the former behavior, we need to call
+  // takeFirst in the pipe
+  //
+
+  //
+  // The streaming resource always has switch map sematics
+  // when the loader returns a new stream
+  //
+  timerResource = rxResource({
+    request: this.request,
+    loader: (params) => {
+      const startValue = params.request.startValue;
+      return interval(1000).pipe(
+        map(v => v + startValue + 1), 
+        startWith(startValue),
+        tap(x => console.log('counter', x)),
+        switchMap((value) => {
+          if (value === 7 || value === 13) {
+            return throwError(() => 'bad luck');
+          }
+          return [value];
+        })
+      );
+    }
+  });
+
+  //
+  // IMHO, this is where the mindset of RxJS
+  // and the resource don't go together:
+  // Other than tradition resources, rxResources
+  // cannot be put into error state but
+  // still go on. 
+  //
+  // If I use catchError, the rxResource never
+  // sees the error.
+  //
+  // Do I miss something here?
+  //
 
   forward(): void {
     this.startValue.update(v => nextSegment(v));
