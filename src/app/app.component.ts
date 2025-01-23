@@ -1,8 +1,6 @@
 import {
   Component,
   computed,
-  DestroyRef,
-  inject,
   resource,
   ResourceRef,
   ResourceStatus,
@@ -22,30 +20,20 @@ export function timerResource(
   startValue: Signal<number>,
 ): ResourceRef<number | undefined> {
 
-  const destroyRef = inject(DestroyRef);
-  const resultSignal = signal<StreamItem>({ value: 0 });
   const request = computed(() => ({
     startValue: startValue()
   }));
-
-  let ref: unknown = null;
 
   const result = resource({
     request: request,
     stream: async (params) => {
       let counter = params.request.startValue;
 
-      //
-      // This converts the default merge map sematics 
-      // into switch map semantics
-      //
-      if (ref) {
-        clearInterval(ref as number);
-      }
+      const resultSignal = signal<StreamItem>({ 
+        value: params.request.startValue 
+      });
 
-      resultSignal.set({ value: params.request.startValue });
-
-      ref = setInterval(() => {
+      const ref = setInterval(() => {
         counter++;
         console.log('tick', counter);
 
@@ -55,17 +43,14 @@ export function timerResource(
           resultSignal.set({ value: counter });
         }
       }, timeout);
+
+      params.abortSignal.addEventListener('abort', () => {
+        console.log('clean up!');
+        clearInterval(ref);
+      });
+
       return resultSignal;
     },
-  });
-
-  //
-  // Is there currently a better way for
-  // closing the unterlying source?
-  //
-  destroyRef.onDestroy(() => {
-    console.log('onDestroy');
-    clearInterval(ref as number);
   });
 
   return result;
