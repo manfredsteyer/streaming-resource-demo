@@ -1,0 +1,44 @@
+<h2>Streaming Resource Demo</h2>
+
+<div class="group">
+  <input
+    placeholder="Your Name"
+    [(ngModel)]="userNameInField"
+    (keydown.enter)="join()"
+  />
+  <button (click)="join()">Join</button>
+</div>
+
+@if(chat.connected()) {
+<div class="group">
+  <input
+    appFocus
+    class="message"
+    placeholder="Your Message"
+    [(ngModel)]="currentMessage"
+    (keydown.enter)="send()"
+  />
+  <button (click)="send()">Send</button>
+</div>
+} 
+
+@if (chat.resource.error()) {
+<p><b>Error:</b> {{ chat.resource.error() | json }}</p>
+}
+
+<ul>
+  @for(message of messages(); track message) {
+  <li>
+    @switch (message.type) { 
+      @case ('username') {
+        <b>{{ message.name }}</b> joined the chat } 
+      @case ('message') {
+        <b>{{ message.name }}:</b> {{ message.text }}
+    } 
+  }
+  </li>
+  }
+</ul>
+
+<p><b>Status:</b> {{ ResourceStatus[chat.resource.status()] }}</p>
+<p><b>Connected:</b> {{ chat.connected() }}</p>

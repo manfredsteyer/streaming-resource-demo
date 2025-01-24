@@ -9,6 +9,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
         <li><a routerLink="/">Home</a></li>
         <li><a routerLink="/resource">Streaming Resource</a></li>
         <li><a routerLink="/rx-resource">Streaming RxResource</a></li>
+        <li><a routerLink="/chat">Chat</a></li>
       </ul>
     </nav>
 
