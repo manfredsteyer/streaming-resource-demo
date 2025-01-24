@@ -26,7 +26,7 @@
 <p><b>Error:</b> {{ chat.resource.error() | json }}</p>
 }
 
-<ul>
+<ul class="messages">
   @for(message of messages(); track message) {
   <li>
     @switch (message.type) { 
@@ -40,5 +40,8 @@
   }
 </ul>
 
-<p><b>Status:</b> {{ ResourceStatus[chat.resource.status()] }}</p>
-<p><b>Connected:</b> {{ chat.connected() }}</p>
+<footer>
+  <p>
+    <b>Connected:</b> {{ chat.connected() }}, <b>Status:</b> {{ ResourceStatus[chat.resource.status()] }}
+  </p>
+</footer>

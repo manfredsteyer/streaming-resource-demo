@@ -2,14 +2,11 @@ import { JsonPipe } from '@angular/common';
 import {
   Component,
   computed,
-  effect,
-  ElementRef,
   linkedSignal,
   resource,
   ResourceRef,
   ResourceStatus,
   signal,
-  viewChild,
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
@@ -57,7 +54,7 @@ export type ChatResponse =
 
 export type StreamItem =
   | {
-      value: ChatResponse | undefined;
+      value: ChatResponse[];
     }
   | {
       error: unknown;
@@ -66,25 +63,18 @@ export type StreamItem =
 export type SendFn = (message: string) => void;
 
 export type ChatConnection = {
-  resource: ResourceRef<ChatResponse | undefined>;
+  resource: ResourceRef<ChatResponse[] | undefined>;
   connected: () => boolean;
   acceptedUserName: () => string;
   send: SendFn;
 };
 
-//
-//  chatConnection returns the resource but also
-//  some additional state
-//
 export function chatConnection(
   websocketUrl: string,
   userName: () => string
 ): ChatConnection {
   let connection: WebSocket;
 
-  //
-  //  Some extra state
-  //
   const connected = signal(false);
   const id = signal(0);
   const acceptedUserName = signal('');
@@ -98,8 +88,10 @@ export function chatConnection(
     stream: async (params) => {
       const userName = params.request?.userName;
 
+      let messages: ChatResponse[] = [];
+
       const resultSignal = signal<StreamItem>({
-        value: undefined,
+        value: messages,
       });
 
       if (!userName) {
@@ -127,7 +119,7 @@ export function chatConnection(
         }
 
         //
-        // Perhaps the cosen username was corrected by the
+        // Perhaps the chosen username was corrected by the
         // server to assure unique names
         //
         if (value.type === 'username' && value.id == id()) {
@@ -139,7 +131,11 @@ export function chatConnection(
         //  joining the chat
         //
         if (value.type === 'message' || value.type === 'username') {
-          resultSignal.set({ value });
+          messages = [
+            ...messages,
+            value
+          ];
+          resultSignal.set({ value: messages });
         }
       });
 
@@ -161,19 +157,21 @@ export function chatConnection(
     },
   });
 
+  const send: SendFn = (message: string) => {
+    const request: ChatRequest = {
+      type: 'message',
+      id: id(),
+      date: Date.now(),
+      text: message,
+    };
+    connection.send(JSON.stringify(request));
+  };
+
   return {
     connected,
     resource: chatResource,
     acceptedUserName,
-    send: (message: string) => {
-      const request: ChatRequest = {
-        type: 'message',
-        id: id(),
-        date: Date.now(),
-        text: message,
-      };
-      connection.send(JSON.stringify(request));
-    },
+    send
   };
 }
 
@@ -187,18 +185,6 @@ function sendUserName(id: number, userName: string, connection: WebSocket) {
   connection.send(JSON.stringify(message));
 }
 
-function collectMessages(chat: ChatConnection) {
-  const messages = signal<ChatResponse[]>([]);
-  effect(() => {
-    const message = chat.resource.value();
-    if (message) {
-      console.log('[effect]', message);
-      messages.update((m) => [...m, message]);
-    }
-  });
-  return messages;
-}
-
 @Component({
   selector: 'chat-resource-resource',
   imports: [FormsModule, JsonPipe, FocusDirective],
@@ -209,11 +195,10 @@ export class ChatResourceComponent {
 
   userName = signal('');
   chat = chatConnection('ws://localhost:6502', this.userName);
-
+  messages = computed(() => this.chat.resource.value() ?? []);
+  
   userNameInField = linkedSignal(() => this.chat.acceptedUserName());
   currentMessage = signal<string>('');
-
-  messages = collectMessages(this.chat);
 
   send() {
     this.chat.send(this.currentMessage());
