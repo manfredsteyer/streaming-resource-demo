@@ -19,6 +19,7 @@ export function timerResource(
   timeout: number,
   startValue: () => number
 ): ResourceRef<number | undefined> {
+  
   const request = computed(() => ({
     startValue: startValue(),
   }));

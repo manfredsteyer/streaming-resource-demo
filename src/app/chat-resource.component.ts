@@ -16,13 +16,11 @@ export type ChatRequest =
   | {
       type: 'username';
       id: number;
-      date: number;
       name: string;
     }
   | {
       type: 'message';
       id: number;
-      date: number;
       text: string;
     };
 
@@ -30,24 +28,15 @@ export type ChatResponse =
   | {
       type: 'id';
       id: number;
-      date: number;
     }
   | {
       type: 'username';
       id: number;
-      date: number;
       name: string;
-    }
-  | {
-      type: 'userlist';
-      id: number;
-      date: number;
-      users: string[];
     }
   | {
       type: 'message';
       id: number;
-      date: number;
       name: string;
       text: string;
     };
@@ -161,7 +150,6 @@ export function chatConnection(
     const request: ChatRequest = {
       type: 'message',
       id: id(),
-      date: Date.now(),
       text: message,
     };
     connection.send(JSON.stringify(request));
@@ -179,7 +167,6 @@ function sendUserName(id: number, userName: string, connection: WebSocket) {
   const message: ChatRequest = {
     type: 'username',
     id: id,
-    date: Date.now(),
     name: userName,
   };
   connection.send(JSON.stringify(message));
