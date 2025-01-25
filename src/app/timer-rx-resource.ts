@@ -1,10 +1,4 @@
-import {
-  Component,
-  computed,
-  ResourceRef,
-  ResourceStatus,
-  signal,
-} from '@angular/core';
+import { computed, ResourceRef } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { interval, map, startWith, switchMap, tap, throwError } from 'rxjs';
 
@@ -33,29 +27,4 @@ export function timerResource(
       );
     },
   });
-}
-
-@Component({
-  selector: 'app-root',
-  imports: [],
-  templateUrl: './timer-rx-resource.component.html',
-})
-export class TimerRxResourceComponent {
-  ResourceStatus = ResourceStatus;
-
-  startValue = signal(0);
-
-  request = computed(() => ({
-    startValue: this.startValue(),
-  }));
-
-  timerResource = timerResource(1000, this.startValue);
-
-  forward(): void {
-    this.startValue.update((v) => nextSegment(v));
-  }
-}
-
-function nextSegment(currentValue: number): number {
-  return Math.floor(currentValue / 100) * 100 + 100;
 }
