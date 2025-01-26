@@ -1,12 +1,5 @@
 import { computed, resource, ResourceRef, signal } from '@angular/core';
-
-export type StreamItem =
-  | {
-      value: number;
-    }
-  | {
-      error: unknown;
-    };
+import { StreamItem } from './utils/stream-item';
 
 export function timerResource(
   timeout: number,
@@ -21,7 +14,7 @@ export function timerResource(
     stream: async (params) => {
       let counter = params.request.startValue;
 
-      const resultSignal = signal<StreamItem>({
+      const resultSignal = signal<StreamItem<number>>({
         value: params.request.startValue,
       });
 

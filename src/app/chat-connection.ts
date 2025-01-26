@@ -1,4 +1,5 @@
 import { computed, resource, ResourceRef, signal } from '@angular/core';
+import { StreamItem } from './utils/stream-item';
 
 export type ChatRequest =
   | {
@@ -27,14 +28,6 @@ export type ChatResponse =
       id: number;
       name: string;
       text: string;
-    };
-
-export type StreamItem =
-  | {
-      value: ChatResponse[];
-    }
-  | {
-      error: unknown;
     };
 
 export type SendFn = (message: string) => void;
@@ -67,7 +60,7 @@ export function chatConnection(
 
       let messages: ChatResponse[] = [];
 
-      const resultSignal = signal<StreamItem>({
+      const resultSignal = signal<StreamItem<ChatResponse[]>>({
         value: messages,
       });
 

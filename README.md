@@ -11,4 +11,3 @@ npm start
 ```
 
 Start server and frontend in different terminal windows.
-

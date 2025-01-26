@@ -27,11 +27,15 @@ export class ChatResourceComponent {
   currentMessage = signal<string>('');
 
   send() {
-    this.chat.send(this.currentMessage());
-    this.currentMessage.set('');
+    if (this.currentMessage()) {
+      this.chat.send(this.currentMessage());
+      this.currentMessage.set('');
+    }
   }
 
   join() {
-    this.userName.set(this.userNameInField());
+    if (this.userNameInField()) {
+      this.userName.set(this.userNameInField());
+    }
   }
 }
